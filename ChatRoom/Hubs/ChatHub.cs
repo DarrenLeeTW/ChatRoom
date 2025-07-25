@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
@@ -9,17 +10,16 @@ namespace ChatRoom.Hubs
 {
     public class ChatHub: Hub
     {
-        public static List<string> ConnIDList = new List<string>();
+        public static ConcurrentDictionary<string, byte> ConnIDList = new ConcurrentDictionary<string, byte>();
 
         public override async Task OnConnectedAsync()
         {
-
-            if (ConnIDList.Where(p => p == Context.ConnectionId).FirstOrDefault() == null)
+            if (!ConnIDList.ContainsKey(Context.ConnectionId))
             {
-                ConnIDList.Add(Context.ConnectionId);
+                ConnIDList.TryAdd(Context.ConnectionId, 0);
             }
             // 更新連線 ID 列表
-            string jsonString = JsonConvert.SerializeObject(ConnIDList);
+            string jsonString = JsonConvert.SerializeObject(ConnIDList.Keys);
             await Clients.All.SendAsync("UpdList", jsonString);
 
             // 更新個人 ID
@@ -33,13 +33,9 @@ namespace ChatRoom.Hubs
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            string id = ConnIDList.Where(p => p == Context.ConnectionId).FirstOrDefault();
-            if (id != null)
-            {
-                ConnIDList.Remove(id);
-            }
+            ConnIDList.TryRemove(Context.ConnectionId, out _);
             // 更新連線 ID 列表
-            string jsonString = JsonConvert.SerializeObject(ConnIDList);
+            string jsonString = JsonConvert.SerializeObject(ConnIDList.Keys);
             await Clients.All.SendAsync("UpdList", jsonString);
 
             // 更新聊天內容

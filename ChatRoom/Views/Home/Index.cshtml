@@ -44,7 +44,7 @@
         connection.on("UpdList", function (jsonList) {
             var list = JSON.parse(jsonList);
             $("#IDList li").remove();
-            for(i=0; i<list.length; i++)
+            for (let i = 0; i < list.length; i++)
             {
                 $("#IDList").append($("<li></li>").attr("class", "list-group-item").text(list[i]));
             }
