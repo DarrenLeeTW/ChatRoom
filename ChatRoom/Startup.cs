@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -26,6 +29,24 @@ namespace ChatRoom
         {
             services.AddControllersWithViews();
             services.AddSignalR();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddGoogle(options =>
+            {
+                var google = Configuration.GetSection("Authentication:Google");
+                options.ClientId = google["ClientId"];
+                options.ClientSecret = google["ClientSecret"];
+            })
+            .AddFacebook(options =>
+            {
+                var facebook = Configuration.GetSection("Authentication:Facebook");
+                options.AppId = facebook["AppId"];
+                options.AppSecret = facebook["AppSecret"];
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +67,7 @@ namespace ChatRoom
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
