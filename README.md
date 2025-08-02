@@ -26,3 +26,8 @@
 - `wwwroot/` – 前端使用的靜態檔案。
 
 本範例可作為學習 ASP.NET Core 及 SignalR 即時通訊的起點。
+
+## OAuth 設定
+
+範例已整合 Google 與 Facebook OAuth 登入，需在 `appsettings.json` 中填入對應的
+`ClientId`、`ClientSecret` 或 `AppId`、`AppSecret` 後才能正常使用。
